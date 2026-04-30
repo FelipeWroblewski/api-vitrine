@@ -44,7 +44,7 @@ def insert_indicadores(df):
                 );
             """)
 
-            cursor.execute("TRUNCATE TABLE homologacao.fvitrine_indicadores_loja;")
+            #cursor.execute("TRUNCATE TABLE homologacao.fvitrine_indicadores_loja;")
             print("Tabela 'homologacao.fvitrine_indicadores_loja' criada e limpa.")
 
             cols = list(df.columns)
@@ -56,7 +56,8 @@ def insert_indicadores(df):
 
             insert_query = f"""
                 INSERT INTO homologacao.fvitrine_indicadores_loja ({','.join(cols)})
-                VALUES %s;
+                VALUES %s
+                ON CONFLICT (id) DO NOTHING;
             """
 
             execute_values(cursor, insert_query, values)
@@ -90,7 +91,7 @@ def insert_quality(df):
                 );
             """)
 
-            cursor.execute("TRUNCATE TABLE homologacao.fvitrine_quality_by_space;")
+            #cursor.execute("TRUNCATE TABLE homologacao.fvitrine_quality_by_space;")
             print("Tabela 'homologacao.fvitrine_quality_by_space' criada e limpa.")
 
             df = df.drop_duplicates(subset=["store_id", "space_id"])
@@ -104,7 +105,8 @@ def insert_quality(df):
 
             insert_query = f"""
                 INSERT INTO homologacao.fvitrine_quality_by_space ({','.join(cols)})
-                VALUES %s;
+                VALUES %s
+                ON CONFLICT (store_id, space_id) DO NOTHING;
             """
 
             execute_values(cursor, insert_query, values)
