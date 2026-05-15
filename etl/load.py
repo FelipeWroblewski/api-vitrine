@@ -19,10 +19,10 @@ def insert_indicadores(df):
                     nm_store VARCHAR(255),
                     code INT2,
                     nm_group VARCHAR(255),
-                    store_status VARCHAR(30),
-                    APROVADOR VARCHAR(30),
+                    store_status VARCHAR(50),
+                    APROVADOR VARCHAR(50),
                     EXECUTOR VARCHAR(50),
-                    COMERCIAL VARCHAR(30),
+                    COMERCIAL VARCHAR(50),
                     VISUALIZADOR VARCHAR(20),
                     FRANQUEADO VARCHAR(50),
                     totalSpace INT2,
@@ -66,7 +66,16 @@ def insert_indicadores(df):
 
     except Exception as e:
         conn.rollback()
-        print(f"Erro durante a operação no DW: {e}")
+
+        print("Erro:", e)
+
+        if hasattr(e, 'diag'):
+            print("Detalhes:")
+            print("Mensagem:", e.diag.message_detail)
+            print("Contexto:", e.diag.context)
+            print("Coluna:", getattr(e.diag, 'column_name', None))
+            print("Tabela:", getattr(e.diag, 'table_name', None))
+
     finally:
         conn.close()
 

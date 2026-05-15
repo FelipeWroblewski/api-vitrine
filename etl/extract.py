@@ -7,18 +7,6 @@ load_dotenv()
 
 url = "https://api.vitrineretail.app/api/indicatorsStores/exportXlsxNew"
 
-def generate_monthly_periods(start_date, end_date):
-    current = start_date
-
-    while current < end_date:
-        if current.month == 12:
-            next_month = current.replace(year=current.year + 1, month=1, day=1)
-        else:
-            next_month = current.replace(month=current.month + 1, day=1)
-
-        yield current, min(next_month, end_date)
-        current = next_month
-
 def extract_data():
     token = os.getenv("API_TOKEN")
 
@@ -27,17 +15,14 @@ def extract_data():
         "Content-Type": "application/json"
     }
 
-    start_date = datetime(2026, 1, 1)
-    end_date = datetime.today()
-
     all_data = []
+    page = 1
 
-    for inicio, fim in generate_monthly_periods(start_date, end_date):
-        print(f"Buscando: {inicio.date()} até {fim.date()}")
-
+    while True:
         payload = {
             "filters": {
                 "format": "json",
+                "page": page,
                 "filterType": "store",
                 "manuals": [],
                 "groups": [],
@@ -47,8 +32,8 @@ def extract_data():
                 "responsibles": [],
                 "comercials": [],
                 "viewers": [],
-                "startDate": inicio.strftime("%Y-%m-%d"),
-                "endDate": fim.strftime("%Y-%m-%d")
+                "startDate": "2026-01-01",
+                "endDate": datetime.today().strftime("%Y-%m-%d")
             }
         }
 
@@ -57,12 +42,18 @@ def extract_data():
             response.raise_for_status()
 
             data = response.json()
-            print(f"Registros retornados: {len(data)}")
 
+            if not data:
+                print(f"Página {page} vazia - fim do período")
+                break
+
+            print(f"Página {page} - {len(data)} registros")
             all_data.extend(data)
+            page += 1
         
         except Exception as e:
-            print(f"Erro no período {inicio.date()} - {fim.date()}: {e}")
+            print(f"Erro na página {page}: {e}")
+            break
 
     print(f"\nTotal coletado: {len(all_data)} registros")
 
